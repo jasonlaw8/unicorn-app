@@ -56,6 +56,9 @@ const STEP_CONFIG: Record<Exclude<GroomingStep, 'done'>, StepInfo> = {
   },
 };
 
+// Icons for the tools wall, in order matching GROOMING_STEPS (excluding 'done')
+const TOOL_WALL_ICONS = ['🔗', '⛓️', '🪥', '🦶', '🐴', '👑', '🏇'];
+
 const CrossTiesScene: React.FC = () => {
   const { state, advanceGrooming } = useGame();
 
@@ -81,11 +84,66 @@ const CrossTiesScene: React.FC = () => {
       ? STEP_CONFIG[currentStep]
       : null;
 
+  const bondLevel: number = (state as any).bondLevel ?? 0;
+
   return (
     <View style={styles.container}>
-      {/* Background accents */}
-      <View style={styles.bgAccent1} />
-      <View style={styles.bgAccent2} />
+      {/* ── Immersive barn environment ── */}
+
+      {/* Left wall panel */}
+      <View style={styles.wallLeft} />
+      {/* Right wall panel */}
+      <View style={styles.wallRight} />
+
+      {/* Top beam */}
+      <View style={styles.topBeam} />
+
+      {/* Floor strip */}
+      <View style={styles.floor} />
+
+      {/* Cross tie ropes — left side */}
+      <View style={styles.crossTieLeft} />
+      {/* Cross tie ropes — right side */}
+      <View style={styles.crossTieRight} />
+
+      {/* ── Bond level indicator (top-right) ── */}
+      <View style={styles.bondBadge}>
+        <Text style={styles.bondText}>💖 Bond: {bondLevel}</Text>
+      </View>
+
+      {/* ── Tools wall row ── */}
+      <View style={styles.toolsWallRow}>
+        {TOOL_WALL_ICONS.map((icon, index) => {
+          const isCompleted = index < currentStepIndex;
+          const isCurrent = index === currentStepIndex;
+          const isFuture = index > currentStepIndex;
+
+          const toolCircle = (
+            <View
+              style={[
+                styles.toolCircle,
+                isCompleted && styles.toolCircleCompleted,
+                isCurrent && styles.toolCircleCurrent,
+                isFuture && styles.toolCircleFuture,
+              ]}
+            >
+              <Text style={[styles.toolIcon, isFuture && styles.toolIconFuture]}>
+                {icon}
+              </Text>
+            </View>
+          );
+
+          return isCurrent ? (
+            <GlowWrapper key={index} active color="#FFD700" style={styles.toolGlow}>
+              {toolCircle}
+            </GlowWrapper>
+          ) : (
+            <View key={index} style={styles.toolGlow}>
+              {toolCircle}
+            </View>
+          );
+        })}
+      </View>
 
       {/* Header */}
       <View style={styles.header}>
@@ -176,31 +234,134 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
   },
-  bgAccent1: {
+
+  // ── Barn environment ──────────────────────────────────────────────────────
+  wallLeft: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: 18,
+    bottom: 80,
+    backgroundColor: '#3D1F08',
+    borderRightWidth: 3,
+    borderRightColor: '#5C2E0A',
+  },
+  wallRight: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 18,
+    bottom: 80,
+    backgroundColor: '#3D1F08',
+    borderLeftWidth: 3,
+    borderLeftColor: '#5C2E0A',
+  },
+  topBeam: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: '35%',
-    backgroundColor: '#4A2866',
-    opacity: 0.6,
-    borderBottomLeftRadius: 60,
-    borderBottomRightRadius: 60,
+    height: 14,
+    backgroundColor: '#2A1205',
+    borderBottomWidth: 2,
+    borderBottomColor: '#6B3A10',
   },
-  bgAccent2: {
+  floor: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: '25%',
-    backgroundColor: '#5C3A1E',
-    opacity: 0.3,
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
+    height: 80,
+    backgroundColor: '#4A2D10',
+    borderTopWidth: 3,
+    borderTopColor: '#6B3A10',
   },
+  crossTieLeft: {
+    position: 'absolute',
+    // Centered vertically around the unicorn display area
+    top: '42%',
+    left: 18,
+    width: '28%',
+    height: 3,
+    backgroundColor: '#8B6914',
+    opacity: 0.8,
+  },
+  crossTieRight: {
+    position: 'absolute',
+    top: '42%',
+    right: 18,
+    width: '28%',
+    height: 3,
+    backgroundColor: '#8B6914',
+    opacity: 0.8,
+  },
+
+  // ── Bond badge ───────────────────────────────────────────────────────────
+  bondBadge: {
+    position: 'absolute',
+    top: 18,
+    right: 24,
+    backgroundColor: 'rgba(255, 20, 147, 0.2)',
+    borderRadius: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 20, 147, 0.4)',
+    zIndex: 10,
+  },
+  bondText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#FF69B4',
+  },
+
+  // ── Tools wall row ───────────────────────────────────────────────────────
+  toolsWallRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+    zIndex: 5,
+  },
+  toolGlow: {
+    borderRadius: 22,
+  },
+  toolCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  toolCircleCompleted: {
+    backgroundColor: '#FFD700',
+    borderColor: '#FFD700',
+  },
+  toolCircleCurrent: {
+    backgroundColor: '#3A2A10',
+    borderColor: '#FFD700',
+    borderWidth: 2,
+  },
+  toolCircleFuture: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  toolIcon: {
+    fontSize: 18,
+  },
+  toolIconFuture: {
+    opacity: 0.35,
+  },
+
+  // ── Existing styles ───────────────────────────────────────────────────────
   header: {
     alignItems: 'center',
     marginBottom: 20,
+    zIndex: 5,
   },
   unicornTitle: {
     fontSize: 28,
@@ -239,6 +400,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 10,
     overflow: 'hidden',
+    zIndex: 5,
   },
   unicornDisplayInner: {
     zIndex: 1,
@@ -259,6 +421,7 @@ const styles = StyleSheet.create({
   progressSection: {
     marginBottom: 24,
     alignItems: 'center',
+    zIndex: 5,
   },
   progressLabel: {
     fontSize: 13,
@@ -312,6 +475,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     borderWidth: 1,
     borderColor: 'rgba(255, 215, 0, 0.3)',
+    zIndex: 5,
   },
   instructionText: {
     fontSize: 20,
@@ -323,6 +487,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
+    zIndex: 5,
   },
   glowAction: {
     borderRadius: 60,
