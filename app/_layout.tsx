@@ -7,9 +7,10 @@ export default function RootLayout() {
     <GameProvider>
       <Stack
         screenOptions={{
+          headerShown: false,
           headerStyle: { backgroundColor: "#7B2D8E" },
           headerTintColor: "#FFF",
-          headerTitle: "Unicorn Care",
+          headerTitle: "Unicorn Care 🦄",
         }}
       />
       <StatusBar style="light" />
